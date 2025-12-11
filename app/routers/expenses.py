@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query,status
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.database import get_db
@@ -50,4 +50,21 @@ def update_expense(id_expense: int, expense: ExpenseUpdate, db: Session=Depends(
     db.refresh(expense_before)
 
     return expense_before
+
+
+@router.delete("/{id_expense}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_expense(id_expense: int, db: Session=Depends(get_db)):
+    expense = db.get(Expense, id_expense)
+
+    if expense is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Gasto para el id {id_expense} no encontrado"
+        )
+    
+    db.delete(expense)
+    db.commit()
+
+
+
     
