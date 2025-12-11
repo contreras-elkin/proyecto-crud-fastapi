@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-
 from app.database import get_db
 from app.models.expense import Expense
-from app.schemas.expense import ExpenseCreate, ExpenseResponse
+from app.schemas.expense import ExpenseCreate, ExpenseResponse, ExpenseUpdate
 
 
 router = APIRouter(prefix="/expenses", tags=["expenses"])
@@ -36,3 +35,19 @@ def get_expense_by_id(id_expense: int, db:Session= Depends(get_db)):
         )
     
     return expense
+
+@router.patch("/{id_expense}")
+def update_expense(id_expense: int, expense: ExpenseUpdate, db: Session=Depends(get_db)):
+
+    expense_before = get_expense_by_id(id_expense, db)
+
+    expense_update = expense.model_dump(exclude_unset=True)
+
+    for key, value in expense_update.items():
+        setattr(expense_before, key, value)
+
+    db.commit()
+    db.refresh(expense_before)
+
+    return expense_before
+    
