@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.database import get_db
@@ -36,18 +36,23 @@ def get_expense_by_id(id_expense: int, db:Session= Depends(get_db)):
     
     return expense
 
-@router.patch("/{id_expense}")
+@router.patch("/{id_expense}", response_model=ExpenseResponse)
 def update_expense(id_expense: int, expense: ExpenseUpdate, db: Session=Depends(get_db)):
 
-    expense_before = get_expense_by_id(id_expense, db)
+    expense_data=db.get(Expense,id_expense)
+    if expense_data is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Gasto para el id {id_expense} no encontrado"
+        )
 
     expense_update = expense.model_dump(exclude_unset=True)
 
     for key, value in expense_update.items():
-        setattr(expense_before, key, value)
+        setattr(expense_data, key, value)
 
     db.commit()
-    db.refresh(expense_before)
+    db.refresh(expense_data)
 
-    return expense_before
+    return expense_data
     
