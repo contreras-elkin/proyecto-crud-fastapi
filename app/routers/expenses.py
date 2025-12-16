@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query,status
+from fastapi import APIRouter, Depends, HTTPException, Query,status, Response
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.database import get_db
@@ -8,12 +8,15 @@ from app.schemas.expense import ExpenseCreate, ExpenseResponse, ExpenseUpdate
 
 router = APIRouter(prefix="/expenses", tags=["expenses"])
 
-@router.post("/", response_model = ExpenseResponse)
-def create_expense(expense: ExpenseCreate, db: Session= Depends(get_db)):
+@router.post("/", response_model = ExpenseResponse, status_code=status.HTTP_201_CREATED)
+def create_expense(expense: ExpenseCreate, response: Response, db: Session= Depends(get_db)):
     new_expense = Expense(**expense.model_dump())
     db.add(new_expense)
     db.commit()
     db.refresh(new_expense)
+
+    response.headers["Location"] = f"/expenses/{new_expense.id}"
+
     return new_expense
 
 @router.get("/", response_model=list[ExpenseResponse])
@@ -24,7 +27,7 @@ def get_all_expenses(
 ):
     return db.scalars(select(Expense).limit(limit).offset(offset)).all()
 
-@router.get("/{id_expense}")
+@router.get("/{id_expense}", response_model=ExpenseResponse)
 def get_expense_by_id(id_expense: int, db:Session= Depends(get_db)):
     expense=db.get(Expense, id_expense)
 
