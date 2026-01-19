@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from app.routers import expenses
-
-from app.database import Base, engine
+from app.core.database import Base, engine
 
 
 app = FastAPI()
