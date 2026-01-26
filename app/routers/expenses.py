@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query,status, Response
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.models.expense import Expense
 from app.schemas.expense import ExpenseCreate, ExpenseResponse, ExpenseUpdate
 from app.services.expense_service import ExpenseService
 from app.repositories.expense_repository import ExpenseRepository
