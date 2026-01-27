@@ -7,6 +7,7 @@ class ExpenseCreate(BaseModel):
     amount: Decimal = Field(gt=0, description="El monto debe ser mayor a 0")
     category: str | None= None
     expense_date: date | None=None
+    user_id: int 
     
 class ExpenseResponse(BaseModel):
     id: int
