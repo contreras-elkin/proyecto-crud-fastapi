@@ -1,3 +1,5 @@
+from app.exceptions.domain import UserNotFoundError
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.models.expense import Expense
@@ -7,11 +9,14 @@ class ExpenseRepository:
         self.db=db
 
     def create(self, expense: Expense):
+        
         self.db.add(expense)
         self.db.commit()
         self.db.refresh(expense)
 
         return expense
+        
+       
     
     def get_all(self, limit, offset):
         
